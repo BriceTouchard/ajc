@@ -29,7 +29,12 @@ int compter(char *n){
     return nbrcat;
 }
 
-void pourcentages(char* argvstr,int *prct){
+/**
+ * @brief Récupère les string d'un argument et les place dans un int array
+ * @param argvstr
+ * @param prct
+ */
+void argStrgToIntArray(char* argvstr,int *prct){
     char * token = strtok(argvstr, ","); // Premier token
     int j=0;
     while( token != NULL ) {
@@ -39,7 +44,11 @@ void pourcentages(char* argvstr,int *prct){
     }
 }
 
-void nom(char* argvstr,char** noms){
+char** argStrgToStrgArray(char* argvstr,int nbrcat){
+    char **noms = malloc(sizeof(char*) * nbrcat);
+    for(int i = 0; i < nbrcat; i++) {
+        noms[i] = malloc(sizeof(char) * 20);
+    }
     char * tok2 = strtok(argvstr, ","); // Premier token
     int k=0;
     while( tok2 != NULL ) {
@@ -47,6 +56,7 @@ void nom(char* argvstr,char** noms){
        tok2 = strtok(NULL, ",");
        k++;
     }
+    return noms;
 }
 
 int main (int argc, char *argv[])
@@ -54,37 +64,33 @@ int main (int argc, char *argv[])
     int nbrcat=compter(argv[1]);
     int prct[nbrcat];
     int rvb[3] = {255,255,255}; // Fond blanc par défaut
-    char **noms = malloc(sizeof(char*) * nbrcat);
-    for(int i = 0; i < nbrcat; i++) {
-        noms[i] = malloc(sizeof(char) * 20);
+    argStrgToIntArray(argv[1],prct);                // récupère les pourcentages et les place dans prct[]
+    char **noms =argStrgToStrgArray(argv[2],nbrcat);// récupère les noms de section
+    char *titre = argv[3];                          // récupère le nom de fichier
+    int persp=0;                                    // Affichage en 2d par défaut
+
+    // Arguments optionnels
+    for (int i = 4; i < argc; i++) {
+        if(argv[i] != NULL){
+            if (strcmp(argv[i],"3d") == 0) {
+                persp=1;
+            }
+            else{
+                argStrgToIntArray(argv[i],rvb);
+            }
+        }
     }
-    pourcentages(argv[1],prct); // récupère les pourcentages et les place dans prct
-    nom(argv[2],noms);          // récupère les noms et les places dans noms
-    char *titre = argv[3];      // récupère le titre
-
-    // todo : for pour parcourir les args et switch case pour les différentes options
-
-    int persp=0;
-    if(argv[4] != NULL && (strcmp(argv[4], "3d") == 0)){
-        persp=1; // on opte pour la perspective 3d
-    }
-
-    if(argv[5] != NULL){
-        printf("couleur = %s\n",argv[5]);
-        pourcentages(argv[5],rvb);
-    }
-
     int trait = 10;         // taille des traits de légende
     int tdist = 50;         // Distance texte-camembert
     int diax = 400;         // diamètre horizontal du camembert
     int diay;               // diamètre vertical du camembert
-    if (persp==1)
+    if (persp==1)           // Affichage 2d ou 3d
         diay=diax-100;
     else
         diay=diax;
     int imgsize = 550;      // taille image
     int epais = 50;         // épaisseur (perspective 3D)
-    int black, white, jaune, rose, orange, fuschia, vert, bleu, marron, gris; // Noms des couleurs (8)
+    int black, jaune, rose, orange, fuschia, vert, bleu, marron, gris; // Noms des couleurs (8)
 
     gdImagePtr im;
     FILE *pngout;
@@ -190,7 +196,7 @@ int main (int argc, char *argv[])
         angle+=prct[i]*3.6;
         angle2=angle+prct[i+1]*3.6/2;
     }
-    gdImageLine(im, imgsize/2, imgsize/2, imgsize/2, imgsize/2-(diay/2+trait), black); //Ligne de départ (12h)
+    gdImageLine(im, imgsize/2, imgsize/2, imgsize/2, imgsize/2-diay/2, black); //Ligne de départ (12h)
 
     // Contour
     gdImageEllipse(im,imgsize/2,imgsize/2,diax,diay,black); //cercle noir
