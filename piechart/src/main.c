@@ -81,7 +81,7 @@ int main (int argc, char *argv[])
         }
     }
     int trait = 10;         // taille des traits de légende
-    int tdist = 50;         // Distance texte-camembert
+    int tdist = 70;         // Distance texte-camembert
     int diax = 400;         // diamètre horizontal du camembert
     int diay;               // diamètre vertical du camembert
     if (persp==1)           // Affichage 2d ou 3d
@@ -90,13 +90,13 @@ int main (int argc, char *argv[])
         diay=diax;
     int imgsize = 550;      // taille image
     int epais = 50;         // épaisseur (perspective 3D)
-    int black, jaune, rose, orange, fuschia, vert, bleu, marron, gris; // Noms des couleurs (8)
+    int black, jaune, rose, orange, fuschia, vert, bleu, marron, gris, bckgrd; // Noms des couleurs (8)
 
     gdImagePtr im;
     FILE *pngout;
     im = gdImageCreate(imgsize, imgsize);  //création de l'image
 
-    gdImageColorAllocate(im, rvb[0], rvb[1], rvb[2]); // background
+    bckgrd = gdImageColorAllocate(im, rvb[0], rvb[1], rvb[2]); // background
     black =   gdImageColorAllocate(im, 0, 0, 0);
 
     jaune =   gdImageColorAllocate(im, 245, 222, 179);
@@ -126,9 +126,9 @@ int main (int argc, char *argv[])
     if (persp==1) {
         for (int i = 0; i < nbrcat; i++){
             // On trace les traits de légendes
-            x1 = imgsize/2 + (diax/2+trait) * cos(angle2/180.*3.14);
-            y1 = imgsize/2 + epais + (diay/2+trait) * sin(angle2/180.*3.14);
-            gdImageLine(im, imgsize/2, imgsize/2+epais, x1, y1, black);
+//            x1 = imgsize/2 + (diax/2+trait) * cos(angle2/180.*3.14);
+//            y1 = imgsize/2 + epais + (diay/2+trait) * sin(angle2/180.*3.14);
+//            gdImageLine(im, imgsize/2, imgsize/2+epais, x1, y1, black);
 
             // arc du dessous
             gdImageFilledArc(im,imgsize/2,imgsize/2+epais,diax,diay,angle,angle+prct[i]*3.6,colors[i],0);
@@ -185,21 +185,21 @@ int main (int argc, char *argv[])
         y3 = imgsize/2 + (diay/2+tdist) * sin(angle2/180.*3.14);
 
         if (persp==1 && y1 < imgsize/2){
-            gdImageLine(im, imgsize/2, imgsize/2, x1, y1, black); // trait de légende
+//            gdImageLine(im, imgsize/2, imgsize/2, x1, y1, black); // trait de légende
         }
         else if (persp==0){
             gdImageLine(im, imgsize/2, imgsize/2, x1, y1, black);
         }
         gdImageFilledArc(im,imgsize/2,imgsize/2,diax,diay,angle,angle+prct[i]*3.6,colors[i],0);
-        gdImageLine(im, imgsize/2, imgsize/2, xcoord[i], ycoord[i], black); // lignes délimitantes
+        gdImageLine(im, imgsize/2, imgsize/2, xcoord[i], ycoord[i], bckgrd); // lignes délimitantes
         gdImageString (im, fonts[4], x3, y3, noms[i], black);
         angle+=prct[i]*3.6;
         angle2=angle+prct[i+1]*3.6/2;
     }
-    gdImageLine(im, imgsize/2, imgsize/2, imgsize/2, imgsize/2-diay/2, black); //Ligne de départ (12h)
+//    gdImageLine(im, imgsize/2, imgsize/2, imgsize/2, imgsize/2-diay/2, bckgrd); //Ligne de départ (12h)
 
     // Contour
-    gdImageEllipse(im,imgsize/2,imgsize/2,diax,diay,black); //cercle noir
+    gdImageEllipse(im,imgsize/2,imgsize/2,diax,diay,bckgrd); //cercle noir
 
     strcat(titre, ".png");
     pngout = fopen(titre, "wb");
