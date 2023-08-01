@@ -11,8 +11,8 @@ Il faut rentrer dans l'ordre :
 4. les arguments optionnels
 
 ##### Arguments optionnels
-* 3d : affichage du diagramme en perspective (effet 3d)
-* [r],[v],[b] : couleur du fond en RVB : [r],[v],[b] sont des nombres compris entre 0 et 255
+* `3d` : affichage du diagramme en perspective (effet 3d)
+* `[r],[v],[b]` : couleur du fond en RVB : [r],[v],[b] sont des nombres compris entre 0 et 255
 
 N.B.: par défaut, c-à-d s'il n'y a aucun argument optionnel saisi, le fond est blanc et l'affichage en 2d.
 
