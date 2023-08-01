@@ -44,6 +44,12 @@ void argStrgToIntArray(char* argvstr,int *prct){
     }
 }
 
+/**
+ * @brief Récupère les string d'un argument et les place dans un string array
+ * @param argvstr
+ * @param nbrcat
+ * @return char** noms
+ */
 char** argStrgToStrgArray(char* argvstr,int nbrcat){
     char **noms = malloc(sizeof(char*) * nbrcat);
     for(int i = 0; i < nbrcat; i++) {
@@ -81,16 +87,17 @@ int main (int argc, char *argv[])
         }
     }
     int trait = 10;         // taille des traits de légende
-    int tdist = 70;         // Distance texte-camembert
+    int tdist = 50;         // Distance texte-camembert
     int diax = 400;         // diamètre horizontal du camembert
     int diay;               // diamètre vertical du camembert
     if (persp==1)           // Affichage 2d ou 3d
-        diay=diax-100;
+        diay=diax-150;
     else
         diay=diax;
     int imgsize = 550;      // taille image
     int epais = 50;         // épaisseur (perspective 3D)
-    int black, jaune, rose, orange, fuschia, vert, bleu, marron, gris, bckgrd; // Noms des couleurs (8)
+    int black, jaune, rose, rosef, orange, orangef, fuschia, fuschiaf,
+            vert, vertf, bleu, marron, gris, bckgrd; // Noms des couleurs (8)
 
     gdImagePtr im;
     FILE *pngout;
@@ -101,14 +108,20 @@ int main (int argc, char *argv[])
 
     jaune =   gdImageColorAllocate(im, 245, 222, 179);
     rose =    gdImageColorAllocate(im, 221, 160, 221);
-    orange =  gdImageColorAllocate(im, 255,  99,  71);
+    rosef =   gdImageColorAllocate(im, 176, 127, 176);
+    orange = gdImageColorAllocate(im, 255,  99,  71);
+    orangef =  gdImageColorAllocate(im, 201,  78,  56);
     fuschia = gdImageColorAllocate(im, 176,  48,  96);
+    fuschiaf =gdImageColorAllocate(im, 122,  33,  67);
     vert =    gdImageColorAllocate(im, 143, 188, 143);
+    vertf =   gdImageColorAllocate(im, 103, 135, 103);
     bleu =    gdImageColorAllocate(im, 10,   50, 255);
     marron =  gdImageColorAllocate(im, 150, 100,   0);
     gris =    gdImageColorAllocate(im, 128, 128, 128);
 
+
     int colors[8] = {jaune, rose, orange, fuschia, vert, bleu, marron, gris};
+    int colorsf[8] = {jaune, rosef, orangef, fuschiaf, vertf, bleu, marron, gris};
 
     gdFontPtr fonts[5];
     fonts[0] = gdFontGetTiny ();
@@ -131,13 +144,13 @@ int main (int argc, char *argv[])
 //            gdImageLine(im, imgsize/2, imgsize/2+epais, x1, y1, black);
 
             // arc du dessous
-            gdImageFilledArc(im,imgsize/2,imgsize/2+epais,diax,diay,angle,angle+prct[i]*3.6,colors[i],0);
+            gdImageFilledArc(im,imgsize/2,imgsize/2+epais,diax,diay,angle,angle+prct[i]*3.6,colorsf[i],0);
             angle+=prct[i]*3.6;
             angle2=angle+prct[i+1]*3.6/2;
         }
     }
 
-    // On stocke les coordonnées des points finaux des lignes délimitant les secions
+    // On stocke les coordonnées des points finaux des lignes délimitant les sections
     int x,y;
     int xcoord[nbrcat];
     int ycoord[nbrcat];
@@ -152,37 +165,53 @@ int main (int argc, char *argv[])
     // On dessine le(s) rectangle(s)
     if (persp==1) {
         angle = -90;
+        for(int i = 0; i < nbrcat ;i++){ // rectangles latéraux
+            if(ycoord[i]-imgsize/2 > 0 && ycoord[i+1]-imgsize/2 < 0){
+//                gdImageFilledRectangle(im,(imgsize-diax)/2,imgsize/2,(imgsize-diax)/2+epais,imgsize/2+epais,colors[i]); // côté gauche
+            }
+            else if(ycoord[i]-imgsize/2 < 0 && ycoord[i+1]-imgsize/2 > 0) {
+                gdImageFilledRectangle(im,(imgsize+diax)/2,imgsize/2,(imgsize+diax)/2-epais,imgsize/2+epais,colorsf[i]); // côté droit
+            }
+        }
         for(int i = 0; i < nbrcat ;i++){ // rectangles inférieurs
             if (ycoord[i] > imgsize/2 && xcoord[i] > imgsize/2) { //quart inf droit
-                gdImageFilledRectangle(im,xcoord[i],ycoord[i],xcoord[i]-epais,ycoord[i]+epais,colors[i]);
+                gdImageFilledRectangle(im,xcoord[i],ycoord[i],xcoord[i]-epais,ycoord[i]+epais+1,colorsf[i]);
             }
             else if (ycoord[i] > imgsize/2 && xcoord[i] < imgsize/2){ //quart inf gauche
-                gdImageFilledRectangle(im,xcoord[i],ycoord[i],xcoord[i]+epais,ycoord[i]+epais,colors[i-1]);
+                gdImageFilledRectangle(im,xcoord[i],ycoord[i],xcoord[i]+epais,ycoord[i]+epais,colorsf[i-1]);
             }
             else if(ycoord[i] < imgsize/2 && ycoord[i-1] > imgsize/2){ //cotés
-                gdImageFilledRectangle(im,(imgsize-diax)/2,imgsize/2,(imgsize-diax)/2+epais,imgsize/2+epais,colors[i-1]);
+                gdImageFilledRectangle(im,(imgsize-diax)/2,imgsize/2,(imgsize-diax)/2+epais,imgsize/2+epais,colorsf[i-1]);
             }
             angle+=prct[i]*3.6;
         }
         for(int i = 0; i < nbrcat ;i++){ // rectangles latéraux
             if(ycoord[i]-imgsize/2 > 0 && ycoord[i+1]-imgsize/2 < 0){
-                gdImageFilledRectangle(im,(imgsize-diax)/2,imgsize/2,(imgsize-diax)/2+epais,imgsize/2+epais,colors[i]); // côté gauche
+                gdImageFilledRectangle(im,(imgsize-diax)/2,imgsize/2,(imgsize-diax)/2+epais,imgsize/2+epais,colorsf[i]); // côté gauche
             }
             else if(ycoord[i]-imgsize/2 < 0 && ycoord[i+1]-imgsize/2 > 0) {
-                gdImageFilledRectangle(im,(imgsize+diax)/2,imgsize/2,(imgsize+diax)/2-epais,imgsize/2+epais,colors[i]); // côté droit
+//                gdImageFilledRectangle(im,(imgsize+diax)/2,imgsize/2,(imgsize+diax)/2-epais,imgsize/2+epais,colors[i]); // côté droit
             }
         }
     }
 
     // On dessine tout le reste (couche du dessus)
+    gdImageFilledEllipse(im,imgsize/2,imgsize/2,diax+5,diay+5,bckgrd);
+
     angle2 = prct[0]*3.6/2-90;
     for (int i = 0; i < nbrcat; i++) {
         // Coordonnées traits de légendes
         x1 = imgsize/2 + (diax/2+trait) * cos(angle2/180.*3.14);
         y1 = imgsize/2 + (diay/2+trait) * sin(angle2/180.*3.14);
         // Coordonnées des textes (noms)
-        x3 = imgsize/2 + (diax/2+tdist) * cos(angle2/180.*3.14);
-        y3 = imgsize/2 + (diay/2+tdist) * sin(angle2/180.*3.14);
+        if(persp==1){
+            x3 = imgsize/2 + (diax/2 - 50) * cos(angle2/180.*3.14) - strlen(noms[i])*2 - 10;
+            y3 = imgsize/2 + (diay/2 - 50) * sin(angle2/180.*3.14);
+        }
+        else{
+            x3 = imgsize/2 + (diax/2+tdist) * cos(angle2/180.*3.14) - strlen(noms[i])*2 - 10;
+            y3 = imgsize/2 + (diay/2+tdist) * sin(angle2/180.*3.14);
+        }
 
         if (persp==1 && y1 < imgsize/2){
 //            gdImageLine(im, imgsize/2, imgsize/2, x1, y1, black); // trait de légende
@@ -199,7 +228,7 @@ int main (int argc, char *argv[])
 //    gdImageLine(im, imgsize/2, imgsize/2, imgsize/2, imgsize/2-diay/2, bckgrd); //Ligne de départ (12h)
 
     // Contour
-    gdImageEllipse(im,imgsize/2,imgsize/2,diax,diay,bckgrd); //cercle noir
+//    gdImageEllipse(im,imgsize/2,imgsize/2,diax,diay,bckgrd); //cercle
 
     strcat(titre, ".png");
     pngout = fopen(titre, "wb");
